@@ -22,7 +22,7 @@ nvim.command('e returnbuf.py')
 nvim.command('vsp outbuf.py')
 nvim.command('e compbuf.py')
 nvim.command('e compretbuf.py')
-nvim.command('e blendscript.py')
+nvim.command('e ~/vlender/blendscript.py')
 
 nvim.command('nnoremap <c-\> yy:b 2<cr>p<c-o>')
 nvim.command('vnoremap <c-\> y:b 2<cr>p<c-o>')
