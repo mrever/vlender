@@ -124,12 +124,12 @@ rd = np.random.rand
 
 #bpy.ops.object.gpencil_add(align='WORLD', location=(0, 0, 0), type='EMPTY', name='shit')
 #bpy.ops.object.add(align='WORLD', location=(0, 0, 0), type='GPENCIL')
-q = bpy.data.grease_pencils.new(name='fuck')
-gp3 = bpy.data.objects.new(name='bitch', object_data=q)
+q = bpy.data.grease_pencils.new(name='mygp')
+gp3 = bpy.data.objects.new(name='mygp', object_data=q)
 bpy.context.view_layer.active_layer_collection.collection.objects.link(gp3)
 gp3
 
-gp3.data.layers.new(name='ass')
+gp3.data.layers.new(name='l1')
 gp3.data.layers[0].frames.new(frame_number=0)
 gp3.data.layers[0].frames[0].strokes.new()
 s = gp3.data.layers[0].frames[0].strokes[0]
@@ -140,7 +140,7 @@ s.points[2].co = (1,2,1)
 s.points[3].co = (4,2,0)
 s.points[4].co = (1,-2,0)
 
-gg = mkgpstroke(name='fuckfarts', numpoints=20)
+gg = mkgpstroke(name='mygp', numpoints=20)
 gg.data.layers[0].frames[0].strokes[0].points[10].co.z = 3
 
 def mkgpstroke(name="mygp", numpoints=10):
@@ -164,3 +164,5 @@ pts = gpencil.data.layers[0].frames[0].strokes[0].points
 pts[100].co.z = 10
 
 gg.data.pixel_factor = 20
+
+bpy.data.materials.new(name='mymat')
