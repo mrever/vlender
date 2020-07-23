@@ -140,11 +140,13 @@ s.points[2].co = (1,2,1)
 s.points[3].co = (4,2,0)
 s.points[4].co = (1,-2,0)
 
-gg = mkgpstroke(name='mygp', numpoints=20)
-gg.data.layers[0].frames[0].strokes[0].points[10].co.z = 3
 
 def mkgpstroke(name="mygp", numpoints=10):
     q = bpy.data.grease_pencils.new(name=name)
+    gpmat = bpy.data.materials.new("Bright Material")
+    bpy.data.materials.create_gpencil_data(gpmat)
+    gpmat.grease_pencil.color = (1,0,1,1)
+    q.materials.append(gpmat)
     gp3 = bpy.data.objects.new(name=name, object_data=q)
     bpy.context.view_layer.active_layer_collection.collection.objects.link(gp3)
     gp3.data.layers.new(name=name)
@@ -156,9 +158,11 @@ def mkgpstroke(name="mygp", numpoints=10):
     for pt in s.points:
         pt.co.x += dx
         dx += 1
-    gp3.data.pixel_factor = 19
+    gp3.data.pixel_factor = 49
     return gp3
 
+gg = mkgpstroke(name='mygp', numpoints=20)
+gg.data.layers[0].frames[0].strokes[0].points[10].co.z = 3
 
 pts = gpencil.data.layers[0].frames[0].strokes[0].points
 pts[100].co.z = 10
@@ -166,3 +170,4 @@ pts[100].co.z = 10
 gg.data.pixel_factor = 20
 
 bpy.data.materials.new(name='mymat')
+bpy.data.materials.create_gpencil_data(material='mgpmat')
