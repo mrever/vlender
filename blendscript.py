@@ -6,7 +6,7 @@ w = cc.window_manager.windows[0]
 s = w.screen
 [print(a.type) for a in w.screen.areas]
 for a in w.screen.areas:
-    if a.type == 'TEXT_EDITOR':
+    if a.type == 'VIEW_3D':
         break
 o = bpy.context.copy()
 o["window"] = w
@@ -154,14 +154,25 @@ def mkgpstroke(name="mygp", numpoints=10):
     gp3.data.layers[0].frames[0].strokes.new()
     s = gp3.data.layers[0].frames[0].strokes[0]
     s.points.add(count=numpoints)
-    dx = 0
-    for pt in s.points:
-        pt.co.x += dx
-        dx += 1
     gp3.data.pixel_factor = 49
+    t = np.linspace(0,20,numpoints)
+    for idx, pt in enumerate(s.points):
+        pt.co = (3*np.cos(t[idx]), 3*np.sin(t[idx]), 0.3*t[idx])
+    dx = 0
+    # for pt in s.points:
+        # pt.co.x += dx
+        # dx += 1
     return gp3
 
-gg = mkgpstroke(name='mygp', numpoints=20)
+gg = mkgpstroke(name='mygp', numpoints=100)
+gg.location.x = -5
+oldobjs = bpy.data.objects.keys()
+bpy.ops.gpencil.convert(o, type='POLY')
+newobj = list(set(bpy.data.objects.keys())-set(oldobjs))[0]
+poly = bpy.data.objects[newobj]
+poly.data.bevel_depth = 2
+bpy.ops.object.convert(o, target='MESH')
+
 gg.data.layers[0].frames[0].strokes[0].points[10].co.z = 3
 
 pts = gpencil.data.layers[0].frames[0].strokes[0].points
