@@ -253,5 +253,6 @@ for f, _ in enumerate(faces):
     obj.data.polygons[f].material_index = np.random.randint(256)
     
 bpy.ops.object.modifier_add(o, type='WIREFRAME')
+# bpy.ops.object.modifier_add(o, type='WIREFRAME')
 
 
