@@ -254,3 +254,4 @@ for f, _ in enumerate(faces):
     
 bpy.ops.object.modifier_add(o, type='WIREFRAME')
 
+
