@@ -140,6 +140,12 @@ s.points[2].co = (1,2,1)
 s.points[3].co = (4,2,0)
 s.points[4].co = (1,-2,0)
 
+q = bpy.data.curves.new(name='mc', type='CURVE')
+mc = bpy.data.objects.new(name='mc', object_data=q)
+bpy.context.view_layer.active_layer_collection.collection.objects.link(mc)
+
+from inspect import signature
+str(signature(actobj))
 
 def mkgpstroke(name="mygp", numpoints=10):
     q = bpy.data.grease_pencils.new(name=name)
@@ -158,23 +164,25 @@ def mkgpstroke(name="mygp", numpoints=10):
     t = np.linspace(0,20,numpoints)
     for idx, pt in enumerate(s.points):
         pt.co = (3*np.cos(t[idx]), 3*np.sin(t[idx]), 0.3*t[idx])
-    dx = 0
-    # for pt in s.points:
-        # pt.co.x += dx
-        # dx += 1
+        # pt.co = (t[idx], 0, 0)
     return gp3
+
+def actobj(obj):
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
 
 gg = mkgpstroke(name='mygp', numpoints=100)
 gg.location.x = -5
+actobj(gg)
 oldobjs = bpy.data.objects.keys()
 bpy.ops.gpencil.convert(o, type='POLY')
 newobj = list(set(bpy.data.objects.keys())-set(oldobjs))[0]
 poly = bpy.data.objects[newobj]
 poly.data.bevel_depth = 2
+actobj(poly)
 bpy.ops.object.convert(o, target='MESH')
 
 gg.data.layers[0].frames[0].strokes[0].points[10].co.z = 3
-
 pts = gpencil.data.layers[0].frames[0].strokes[0].points
 pts[100].co.z = 10
 
@@ -182,3 +190,67 @@ gg.data.pixel_factor = 20
 
 bpy.data.materials.new(name='mymat')
 bpy.data.materials.create_gpencil_data(material='mgpmat')
+
+
+from colorsys import hsv_to_rgb
+
+bpy.context.scene.eevee.use_gtao = True
+bpy.context.scene.eevee.use_bloom = True
+bpy.context.scene.eevee.use_ssr = True
+bpy.context.scene.render.resolution_x = 640
+bpy.context.scene.render.resolution_y = 360
+
+
+
+mesh = bpy.data.meshes.new("myMesh")  # add the new mesh
+obj = bpy.data.objects.new(mesh.name, mesh)
+col = bpy.data.collections.get("Collection")
+col.objects.link(obj)
+bpy.context.view_layer.objects.active = obj
+
+numx, numy = 300, 190
+xv = np.linspace(0,10,numx)
+yv = np.linspace(0,10,numy)
+verts = []
+for x in xv:
+    for y in yv:
+        verts.append([x,y,0])
+edges = []
+faces = []
+for x in range(numx-1):
+    for y in range(numy-1):
+        f1 = x*numy + y
+        f2 = (x+1)*numy + y
+        f3 = (x+1)*numy + y+1
+        f4 = x*numy + y+1
+        faces.append([f1,f2,f3,f4])
+numfaces = len(faces)
+ids = np.random.choice(numfaces,numfaces,replace=False)
+faces = list(np.array(faces)[ids])
+
+mesh.from_pydata(verts, edges, faces)
+
+matlist = []
+for cidx in range(256):
+    nmat = bpy.data.materials.new('m3')
+    nmat.use_nodes = True
+    ntree = nmat.node_tree
+    nodes = ntree.nodes
+    bsdf = nodes.get("Principled BSDF")
+    bc = bsdf.inputs['Base Color']
+    em = bsdf.inputs['Emission']
+    cval = cidx/255
+    r,g,b = hsv_to_rgb(cval, 1,1)
+    bc.default_value = (r,g,b,1)
+    gfac = 1*(3*cidx/255+1)
+    em.default_value = (gfac*r,gfac*g,gfac*b,1)
+    matlist.append(nmat)
+
+for nmat in matlist:
+    obj.data.materials.append(nmat)
+
+for f, _ in enumerate(faces): 
+    obj.data.polygons[f].material_index = np.random.randint(256)
+    
+bpy.ops.object.modifier_add(o, type='WIREFRAME')
+

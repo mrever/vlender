@@ -1,4 +1,5 @@
 import bpy
+from bpy.app.handlers import persistent
 from neovim import attach
 from console.intellisense import complete
 import numpy as np
@@ -8,15 +9,15 @@ from time import sleep
 
 print(os.getcwd())
 
-os.environ['NVIM_LISTEN_ADDRESS'] = '\\\\.\\pipe\\nvim-12000-0'
-subprocess.Popen(['./Neovim/bin/nvim-qt.exe'])
-sleep(1)
-for index in range(10):
-    try:
-        nvim = attach('socket', path='\\\\.\\pipe\\nvim-12000-0')
-    except:
-        sleep(1)
-
+#os.environ['NVIM_LISTEN_ADDRESS'] = '\\\\.\\pipe\\nvim-12000-0'
+#subprocess.Popen(['./Neovim/bin/nvim-qt.exe'])
+#sleep(1)
+#for index in range(10):
+#    try:
+#        nvim = attach('socket', path='\\\\.\\pipe\\nvim-12000-0')
+#    except:
+#        sleep(1)
+nvim = attach('socket', path='\\\\.\\pipe\\nvim-12000-0')
 
 nvim.command('e returnbuf.py')
 nvim.command('vsp outbuf.py')
@@ -36,7 +37,7 @@ nvim.command('inoremap <c-u> <esc>mp0v$hy:b 3<cr>ggp<c-o>`pa')
 nvim.command('colorscheme personal_dark')
 nvim.command('set guifont=Consolas:h12')
 
-
+@persistent
 def print(*args, **kwargs):
     outstr = ''
     for arg in args:
@@ -52,6 +53,7 @@ oo = bpy.data.objects
 ops = bpy.ops
 mcontext = bpy.context.copy()
 
+@persistent
 def objectify():
     for obj in oo.keys():
         globals()[obj.lower().replace('.','')] = oo[obj]
@@ -62,6 +64,7 @@ def get_completions(linein):
     return complete(linein, len(linein), globals(), True)[0]
 
 storevars = {}
+@persistent
 def pollnvim():
     code = '\n'.join(nvim.buffers[2][:])
     nvim.buffers[2][:]=[]
